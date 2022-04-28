@@ -1,6 +1,10 @@
 package application;
 
+import java.util.InputMismatchException;
+import java.util.Scanner;
+
 import chess.ChessPiece;
+import chess.ChessPosition;
 import chess.enums.Color;
 
 public class Ui {
@@ -28,6 +32,18 @@ public class Ui {
 		}
 		else {
 			System.out.print("-");
+		}
+	}
+	
+	public static ChessPosition readChessPosition(Scanner sc) {
+		try {
+			String read = sc.nextLine().toLowerCase();
+			char column = read.charAt(0);
+			int row = (int) read.charAt(1) - '0';
+			return new ChessPosition(row, column);
+		}
+		catch (RuntimeException e) {
+			throw new InputMismatchException("Error reading ChessPosition. Position must be from a1 to h8");
 		}
 	}
 }

@@ -4,6 +4,7 @@ import board.Board;
 import chess.enums.Color;
 import chess.pieces.King;
 import chess.pieces.Rook;
+import exceptions.ChessException;
 
 public class ChessMatch {
 	
@@ -78,5 +79,14 @@ public class ChessMatch {
 			}
 		}
 		return pieces;
+	}
+	
+	public ChessPiece performChessMove(ChessPosition sourcePosition, ChessPosition targetPosition) {
+		if (!this.board.thereIsAPiece(sourcePosition.toPosition())) {
+			throw new ChessException("There is no piece in source position");
+		}
+		ChessPiece capturedPiece = (ChessPiece) this.board.removePiece(targetPosition.toPosition());
+		this.board.placePiece(this.board.removePiece(sourcePosition.toPosition()), targetPosition.toPosition());;
+		return capturedPiece;
 	}
 }
