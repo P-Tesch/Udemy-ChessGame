@@ -1,6 +1,6 @@
 package board;
 
-import board.exceptions.BoardException;
+import exceptions.BoardException;
 
 public class Board {
 	
