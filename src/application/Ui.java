@@ -1,6 +1,7 @@
 package application;
 
 import chess.ChessPiece;
+import chess.enums.Color;
 
 public class Ui {
 	
@@ -18,7 +19,12 @@ public class Ui {
 	public static void printPiece(ChessPiece piece) {
 		System.out.print(" ");
 		if (piece != null) {
-			System.out.print(piece);
+			if (piece.getColor() == Color.WHITE) {
+				System.out.print(piece);
+			}
+			else {
+				System.out.print(piece.toString().toLowerCase());
+			}
 		}
 		else {
 			System.out.print("-");

@@ -2,6 +2,7 @@ package chess;
 
 import board.Board;
 import chess.enums.Color;
+import chess.pieces.King;
 import chess.pieces.Rook;
 
 public class ChessMatch {
@@ -64,6 +65,9 @@ public class ChessMatch {
 	
 	private void initialSetup() {
 		this.placePiece('b', 6, new Rook(this.board, Color.WHITE));;
+		this.placePiece('b', 7, new King(this.board, Color.WHITE));;
+		this.placePiece('c', 6, new Rook(this.board, Color.BLACK));;
+		this.placePiece('c', 7, new King(this.board, Color.BLACK));;
 	}
 	
 	public ChessPiece[][] getPieces() {
