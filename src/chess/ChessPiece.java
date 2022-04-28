@@ -1,7 +1,7 @@
 package chess;
 
-import boardLayer.Board;
-import boardLayer.Piece;
+import board.Board;
+import board.Piece;
 import chess.enums.Color;
 
 public class ChessPiece extends Piece{

@@ -1,7 +1,7 @@
 package chess;
 
-import boardLayer.Board;
-import boardLayer.Position;
+import board.Board;
+import board.Position;
 import chess.enums.Color;
 import chess.pieces.Rook;
 

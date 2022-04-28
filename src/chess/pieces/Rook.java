@@ -1,6 +1,6 @@
 package chess.pieces;
 
-import boardLayer.Board;
+import board.Board;
 import chess.ChessPiece;
 import chess.enums.Color;
 
