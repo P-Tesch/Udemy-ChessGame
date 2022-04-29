@@ -65,10 +65,10 @@ public class ChessMatch {
 	}
 	
 	private void initialSetup() {
-		this.placePiece('b', 6, new Rook(this.board, Color.WHITE));;
-		this.placePiece('b', 7, new King(this.board, Color.WHITE));;
-		this.placePiece('c', 6, new Rook(this.board, Color.BLACK));;
-		this.placePiece('c', 7, new King(this.board, Color.BLACK));;
+		this.placePiece('d', 4, new Rook(this.board, Color.WHITE));;
+		this.placePiece('g', 4, new King(this.board, Color.WHITE));;
+		this.placePiece('d', 7, new Rook(this.board, Color.BLACK));;
+		//this.placePiece('c', 7, new King(this.board, Color.BLACK));;
 	}
 	
 	public ChessPiece[][] getPieces() {
@@ -87,6 +87,9 @@ public class ChessMatch {
 		}
 		if (!this.board.piece(sourcePosition.toPosition()).isThereAnyPossibleMove()) {
 			throw new ChessException("There is no possible move");
+		}
+		if (!this.board.piece(sourcePosition.toPosition()).possibleMoves()[targetPosition.toPosition().getRow()][targetPosition.toPosition().getColumn()]) {
+			throw new ChessException("Target Position is not valid");
 		}
 		ChessPiece capturedPiece = (ChessPiece) this.board.removePiece(targetPosition.toPosition());
 		this.board.placePiece(this.board.removePiece(sourcePosition.toPosition()), targetPosition.toPosition());;
