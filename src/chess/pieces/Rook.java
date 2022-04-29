@@ -65,7 +65,6 @@ public class Rook extends ChessPiece {
 		}
 		
 		//Left
-		//Right
 		for (int i = this.getPosition().getColumn() - 1; i >= 0; i--) {
 			Position position = new Position(this.getPosition().getRow(), i);
 			ChessPiece piece = (ChessPiece) this.getBoard().piece(position);

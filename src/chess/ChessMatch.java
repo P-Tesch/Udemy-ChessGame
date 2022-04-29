@@ -82,17 +82,30 @@ public class ChessMatch {
 	}
 	
 	public ChessPiece performChessMove(ChessPosition sourcePosition, ChessPosition targetPosition) {
+		this.validateSourcePosition(sourcePosition);
+		this.validadeTargetPosition(sourcePosition, targetPosition);
+		ChessPiece capturedPiece = (ChessPiece) this.board.removePiece(targetPosition.toPosition());
+		this.board.placePiece(this.board.removePiece(sourcePosition.toPosition()), targetPosition.toPosition());;
+		return capturedPiece;
+	}
+	
+	public boolean[][] possibleMoves(ChessPosition sourcePosition) {
+		this.validateSourcePosition(sourcePosition);
+		return this.getBoard().piece(sourcePosition.toPosition()).possibleMoves();
+	}
+	
+	private void validateSourcePosition(ChessPosition sourcePosition) {
 		if (!this.board.thereIsAPiece(sourcePosition.toPosition())) {
 			throw new ChessException("There is no piece in source position");
 		}
 		if (!this.board.piece(sourcePosition.toPosition()).isThereAnyPossibleMove()) {
 			throw new ChessException("There is no possible move");
 		}
+	}
+	
+	private void validadeTargetPosition(ChessPosition sourcePosition, ChessPosition targetPosition) {
 		if (!this.board.piece(sourcePosition.toPosition()).possibleMoves()[targetPosition.toPosition().getRow()][targetPosition.toPosition().getColumn()]) {
 			throw new ChessException("Target Position is not valid");
 		}
-		ChessPiece capturedPiece = (ChessPiece) this.board.removePiece(targetPosition.toPosition());
-		this.board.placePiece(this.board.removePiece(sourcePosition.toPosition()), targetPosition.toPosition());;
-		return capturedPiece;
 	}
 }

@@ -22,10 +22,11 @@ public class Program {
 				System.out.print("\nSource position: ");
 				ChessPosition source = Ui.readChessPosition(sc);
 				
+				Ui.printBoard(chessMatch.getPieces(), chessMatch.possibleMoves(source));
+				
 				System.out.print("\nTarget Position: ");
 				ChessPosition target = Ui.readChessPosition(sc);
 				ChessPiece captured = chessMatch.performChessMove(source, target);
-				Ui.printPiece(captured);
 				System.out.println();
 			}
 			catch (ChessException exception) {
