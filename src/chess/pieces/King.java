@@ -12,8 +12,10 @@ public class King extends ChessPiece {
 	}
 	
 	private boolean canMove(Position position) {
-		ChessPiece piece = (ChessPiece) this.getBoard().piece(position);
-		return this.getBoard().positionExists(position) && (piece == null || piece.getColor() != this.getColor());
+		if (!this.getBoard().positionExists(position)) {
+			return false;
+		}
+		return this.getBoard().positionExists(position) && (!this.getBoard().thereIsAPiece(position) || this.isThereOpponentPiece(position));
 	}
 	
 	@Override
@@ -21,15 +23,13 @@ public class King extends ChessPiece {
 		boolean[][] possibleMoves = new boolean[this.getBoard().getRows()][this.getBoard().getColumns()];
 		Position kingPosition = this.getPosition();
 		
-		//Clockwise
-		possibleMoves[kingPosition.getRow()][kingPosition.getColumn() - 1] = canMove(new Position(kingPosition.getRow(), kingPosition.getColumn() - 1));
-		possibleMoves[kingPosition.getRow() + 1][kingPosition.getColumn() - 1] = canMove(new Position(kingPosition.getRow() + 1, kingPosition.getColumn() - 1));
-		possibleMoves[kingPosition.getRow() + 1][kingPosition.getColumn()] = canMove(new Position(kingPosition.getRow() + 1, kingPosition.getColumn()));
-		possibleMoves[kingPosition.getRow() + 1][kingPosition.getColumn() + 1] = canMove(new Position(kingPosition.getRow() + 1, kingPosition.getColumn() + 1));
-		possibleMoves[kingPosition.getRow()][kingPosition.getColumn() + 1] = canMove(new Position(kingPosition.getRow(), kingPosition.getColumn() + 1));
-		possibleMoves[kingPosition.getRow() - 1][kingPosition.getColumn() + 1] = canMove(new Position(kingPosition.getRow() - 1, kingPosition.getColumn() + 1));
-		possibleMoves[kingPosition.getRow() - 1][kingPosition.getColumn()] = canMove(new Position(kingPosition.getRow() - 1, kingPosition.getColumn()));
-		possibleMoves[kingPosition.getRow() - 1][kingPosition.getColumn() - 1] = canMove(new Position(kingPosition.getRow() - 1, kingPosition.getColumn() - 1));
+		for (int i = -1; i <= 1; i++) {
+			for (int j = -1; j <= 1; j++) {
+				if (this.canMove(new Position((kingPosition.getRow() + i), (kingPosition.getColumn() + j)))) {
+					possibleMoves[kingPosition.getRow() + i][kingPosition.getColumn() + j] = true;
+				}
+			}
+		}
 		
 		return possibleMoves;
 	}

@@ -61,7 +61,7 @@ public class Board {
 	}
 	
 	public boolean positionExists(Position position) {
-		return (position.getRow() <= this.getRows() && position.getColumn() <= this.getColumns() && position.getRow() >= 0 && position.getColumn() >= 0);
+		return (position.getRow() < this.getRows() && position.getColumn() < this.getColumns() && position.getRow() >= 0 && position.getColumn() >= 0);
 	}
 	
 	public boolean thereIsAPiece(Position position) {

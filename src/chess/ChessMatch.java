@@ -2,6 +2,7 @@ package chess;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import board.Board;
 import chess.enums.Color;
@@ -41,16 +42,8 @@ public class ChessMatch {
 		return check;
 	}
 
-	public void setCheck(boolean check) {
-		this.check = check;
-	}
-
 	public ChessPiece getEnPassantVulnerable() {
 		return enPassantVulnerable;
-	}
-
-	public void setEnPassantVulnerable(ChessPiece enPassantVulnerable) {
-		this.enPassantVulnerable = enPassantVulnerable;
 	}
 
 	public ChessPiece getPromoted() {
@@ -69,6 +62,15 @@ public class ChessMatch {
 		return piecesOnTheBoard;
 	}
 	
+	private void initialSetup() {
+		this.placePiece('a', 1, new Rook(this.board, Color.WHITE));
+		this.placePiece('h', 1, new Rook(this.board, Color.WHITE));
+		this.placePiece('e', 2, new King(this.board, Color.WHITE));
+		this.placePiece('a', 8, new Rook(this.board, Color.BLACK));
+		this.placePiece('h', 8, new Rook(this.board, Color.BLACK));
+		this.placePiece('e', 8, new King(this.board, Color.BLACK));
+	}
+	
 	private void nextTurn() {
 		this.turn++;
 		this.currentPlayer = (this.currentPlayer == Color.WHITE) ? Color.BLACK : Color.WHITE;
@@ -79,13 +81,25 @@ public class ChessMatch {
 		this.piecesOnTheBoard.add(piece);
 	}
 	
-	private void initialSetup() {
-		this.placePiece('a', 1, new Rook(this.board, Color.WHITE));
-		this.placePiece('h', 1, new Rook(this.board, Color.WHITE));
-		this.placePiece('e', 1, new King(this.board, Color.WHITE));
-		this.placePiece('a', 8, new Rook(this.board, Color.BLACK));
-		this.placePiece('h', 8, new Rook(this.board, Color.BLACK));
-		this.placePiece('e', 8, new King(this.board, Color.BLACK));
+	
+	private boolean testCheck(Color color) {
+		for (ChessPiece piece : this.piecesOnTheBoard.stream().filter(x -> x.getColor() != color).collect(Collectors.toList())) {
+			ChessPiece king = this.king(color);
+			if (piece.possibleMoves()[king.getChessPosition().toPosition().getRow()][king.getChessPosition().toPosition().getColumn()]) {
+				return true;
+			}
+			
+		}
+		return false;
+	}
+	
+	private ChessPiece king(Color color) {
+		for (ChessPiece piece : this.piecesOnTheBoard.stream().filter(x -> x.getColor() == color).collect(Collectors.toList())) {
+			if (piece instanceof King) {
+				return piece;
+			}
+		}
+		throw new IllegalStateException("There is no " + color + "king on the board");
 	}
 	
 	public ChessPiece[][] getPieces() {
@@ -103,10 +117,29 @@ public class ChessMatch {
 		this.validadeTargetPosition(sourcePosition, targetPosition);
 		ChessPiece capturedPiece = (ChessPiece) this.board.removePiece(targetPosition.toPosition());
 		this.board.placePiece(this.board.removePiece(sourcePosition.toPosition()), targetPosition.toPosition());;
-		this.nextTurn();
 		if (capturedPiece != null) {
 			this.piecesOnTheBoard.remove(capturedPiece);
 			this.capturedPieces.add(capturedPiece);
+		}
+		
+		if (this.testCheck(currentPlayer)) {
+			this.undoMove(sourcePosition, targetPosition, capturedPiece);
+			throw new ChessException("Illegal move, can't put your own king in check ");
+		}
+		
+		if (this.testCheck((currentPlayer == Color.WHITE) ? Color.BLACK : Color.WHITE)) {
+			this.check = true;
+		}
+		
+		this.nextTurn();
+	}
+	
+	private void undoMove(ChessPosition sourcePosition, ChessPosition targetPosition, ChessPiece capturedPiece) {
+		this.board.placePiece(this.board.removePiece(targetPosition.toPosition()), sourcePosition.toPosition());
+		if (capturedPiece != null) {
+			this.board.placePiece(capturedPiece, targetPosition.toPosition());
+			this.capturedPieces.remove(capturedPiece);
+			this.piecesOnTheBoard.add(capturedPiece);
 		}
 	}
 	
@@ -114,6 +147,7 @@ public class ChessMatch {
 		this.validateSourcePosition(sourcePosition);
 		return this.getBoard().piece(sourcePosition.toPosition()).possibleMoves();
 	}
+	
 	
 	private void validateSourcePosition(ChessPosition sourcePosition) {
 		if (!this.board.thereIsAPiece(sourcePosition.toPosition())) {
