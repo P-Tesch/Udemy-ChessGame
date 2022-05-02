@@ -17,6 +17,8 @@ public class ChessMatch {
 	
 	public ChessMatch() {
 		this.board = new Board(8, 8);
+		this.turn = 1;
+		this.currentPlayer = Color.WHITE;
 		this.initialSetup();
 	}
 
@@ -24,16 +26,8 @@ public class ChessMatch {
 		return turn;
 	}
 
-	public void setTurn(int turn) {
-		this.turn = turn;
-	}
-
 	public Color getCurrentPlayer() {
 		return currentPlayer;
-	}
-
-	public void setCurrentPlayer(Color currentPlayer) {
-		this.currentPlayer = currentPlayer;
 	}
 
 	public boolean isCheck() {
@@ -58,6 +52,11 @@ public class ChessMatch {
 
 	public Board getBoard() {
 		return board;
+	}
+	
+	private void nextTurn() {
+		this.turn++;
+		this.currentPlayer = (this.currentPlayer == Color.WHITE) ? Color.BLACK : Color.WHITE;
 	}
 	
 	private void placePiece(char column, int row, ChessPiece piece) {
@@ -86,6 +85,7 @@ public class ChessMatch {
 		this.validadeTargetPosition(sourcePosition, targetPosition);
 		ChessPiece capturedPiece = (ChessPiece) this.board.removePiece(targetPosition.toPosition());
 		this.board.placePiece(this.board.removePiece(sourcePosition.toPosition()), targetPosition.toPosition());;
+		this.nextTurn();
 		return capturedPiece;
 	}
 	
@@ -97,6 +97,9 @@ public class ChessMatch {
 	private void validateSourcePosition(ChessPosition sourcePosition) {
 		if (!this.board.thereIsAPiece(sourcePosition.toPosition())) {
 			throw new ChessException("There is no piece in source position");
+		}
+		if (((ChessPiece)this.board.piece(sourcePosition.toPosition())).getColor() != this.currentPlayer) {
+			throw new ChessException("This piece is not owned by the current player");
 		}
 		if (!this.board.piece(sourcePosition.toPosition()).isThereAnyPossibleMove()) {
 			throw new ChessException("There is no possible move");
