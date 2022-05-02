@@ -1,5 +1,8 @@
 package chess;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import board.Board;
 import chess.enums.Color;
 import chess.pieces.King;
@@ -14,11 +17,15 @@ public class ChessMatch {
 	private ChessPiece enPassantVulnerable;
 	private ChessPiece promoted;
 	private Board board;
+	private List<ChessPiece> capturedPieces;
+	private List<ChessPiece> piecesOnTheBoard;
 	
 	public ChessMatch() {
 		this.board = new Board(8, 8);
 		this.turn = 1;
 		this.currentPlayer = Color.WHITE;
+		this.capturedPieces = new ArrayList<>();
+		this.piecesOnTheBoard = new ArrayList<>();
 		this.initialSetup();
 	}
 
@@ -54,6 +61,14 @@ public class ChessMatch {
 		return board;
 	}
 	
+	public List<ChessPiece> getCapturedPieces() {
+		return capturedPieces;
+	}
+	
+	public List<ChessPiece> getPiecesOnTheBoard() {
+		return piecesOnTheBoard;
+	}
+	
 	private void nextTurn() {
 		this.turn++;
 		this.currentPlayer = (this.currentPlayer == Color.WHITE) ? Color.BLACK : Color.WHITE;
@@ -61,13 +76,16 @@ public class ChessMatch {
 	
 	private void placePiece(char column, int row, ChessPiece piece) {
 		this.board.placePiece(piece, new ChessPosition(row, column).toPosition());
+		this.piecesOnTheBoard.add(piece);
 	}
 	
 	private void initialSetup() {
-		this.placePiece('d', 4, new Rook(this.board, Color.WHITE));;
-		this.placePiece('g', 4, new King(this.board, Color.WHITE));;
-		this.placePiece('d', 7, new Rook(this.board, Color.BLACK));;
-		//this.placePiece('c', 7, new King(this.board, Color.BLACK));;
+		this.placePiece('a', 1, new Rook(this.board, Color.WHITE));
+		this.placePiece('h', 1, new Rook(this.board, Color.WHITE));
+		this.placePiece('e', 1, new King(this.board, Color.WHITE));
+		this.placePiece('a', 8, new Rook(this.board, Color.BLACK));
+		this.placePiece('h', 8, new Rook(this.board, Color.BLACK));
+		this.placePiece('e', 8, new King(this.board, Color.BLACK));
 	}
 	
 	public ChessPiece[][] getPieces() {
@@ -80,13 +98,16 @@ public class ChessMatch {
 		return pieces;
 	}
 	
-	public ChessPiece performChessMove(ChessPosition sourcePosition, ChessPosition targetPosition) {
+	public void performChessMove(ChessPosition sourcePosition, ChessPosition targetPosition) {
 		this.validateSourcePosition(sourcePosition);
 		this.validadeTargetPosition(sourcePosition, targetPosition);
 		ChessPiece capturedPiece = (ChessPiece) this.board.removePiece(targetPosition.toPosition());
 		this.board.placePiece(this.board.removePiece(sourcePosition.toPosition()), targetPosition.toPosition());;
 		this.nextTurn();
-		return capturedPiece;
+		if (capturedPiece != null) {
+			this.piecesOnTheBoard.remove(capturedPiece);
+			this.capturedPieces.add(capturedPiece);
+		}
 	}
 	
 	public boolean[][] possibleMoves(ChessPosition sourcePosition) {
