@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import board.Board;
 import chess.enums.Color;
+import chess.pieces.Bishop;
 import chess.pieces.King;
 import chess.pieces.Pawn;
 import chess.pieces.Rook;
@@ -75,6 +76,8 @@ public class ChessMatch {
 		this.placePiece('a', 1, new Rook(this.board, Color.WHITE));
 		this.placePiece('h', 1, new Rook(this.board, Color.WHITE));
 		this.placePiece('e', 1, new King(this.board, Color.WHITE));
+		this.placePiece('c', 1, new Bishop(this.board, Color.WHITE));
+		this.placePiece('f', 1, new Bishop(this.board, Color.WHITE));
 		
 		for (int i = 0; i < this.getBoard().getColumns(); i++) {
 			this.placePiece((char)('a' + i), 7, new Pawn(this.board, Color.BLACK));
@@ -82,6 +85,8 @@ public class ChessMatch {
 		this.placePiece('a', 8, new Rook(this.board, Color.BLACK));
 		this.placePiece('h', 8, new Rook(this.board, Color.BLACK));
 		this.placePiece('e', 8, new King(this.board, Color.BLACK));
+		this.placePiece('c', 8, new Bishop(this.board, Color.BLACK));
+		this.placePiece('f', 8, new Bishop(this.board, Color.BLACK));
 	}
 	
 	private void nextTurn() {
