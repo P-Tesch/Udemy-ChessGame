@@ -8,6 +8,7 @@ import board.Board;
 import chess.enums.Color;
 import chess.pieces.Bishop;
 import chess.pieces.King;
+import chess.pieces.Knight;
 import chess.pieces.Pawn;
 import chess.pieces.Queen;
 import chess.pieces.Rook;
@@ -80,6 +81,8 @@ public class ChessMatch {
 		this.placePiece('c', 1, new Bishop(this.board, Color.WHITE));
 		this.placePiece('f', 1, new Bishop(this.board, Color.WHITE));
 		this.placePiece('d', 1, new Queen(this.board, Color.WHITE));
+		this.placePiece('b', 1, new Knight(this.board, Color.WHITE));
+		this.placePiece('g', 1, new Knight(this.board, Color.WHITE));
 		
 		for (int i = 0; i < this.getBoard().getColumns(); i++) {
 			this.placePiece((char)('a' + i), 7, new Pawn(this.board, Color.BLACK));
@@ -90,6 +93,8 @@ public class ChessMatch {
 		this.placePiece('c', 8, new Bishop(this.board, Color.BLACK));
 		this.placePiece('f', 8, new Bishop(this.board, Color.BLACK));
 		this.placePiece('d', 8, new Queen(this.board, Color.BLACK));
+		this.placePiece('b', 8, new Knight(this.board, Color.BLACK));
+		this.placePiece('g', 8, new Knight(this.board, Color.BLACK));
 	}
 	
 	private void nextTurn() {
@@ -169,6 +174,9 @@ public class ChessMatch {
 		
 		if (this.testCheck((currentPlayer == Color.WHITE) ? Color.BLACK : Color.WHITE)) {
 			this.check = true;
+		}
+		else {
+			this.check = false;
 		}
 		
 		if (this.testCheckmate((currentPlayer == Color.WHITE) ? Color.BLACK : Color.WHITE)) {
