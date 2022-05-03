@@ -15,7 +15,7 @@ public class Program {
 		
 		ChessMatch chessMatch = new ChessMatch();
 		
-		while (true) {
+		while (!chessMatch.isCheckmate()) {
 			try {
 				Ui.printMatch(chessMatch);
 				System.out.print("\nSource position: ");
@@ -37,5 +37,6 @@ public class Program {
 				sc.nextLine();
 			}
 		}
+		Ui.printMatch(chessMatch);
 	}
 }

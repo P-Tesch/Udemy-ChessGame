@@ -15,6 +15,7 @@ public class ChessMatch {
 	private int turn;
 	private Color currentPlayer;
 	private boolean check;
+	private boolean checkmate;
 	private ChessPiece enPassantVulnerable;
 	private ChessPiece promoted;
 	private Board board;
@@ -40,6 +41,10 @@ public class ChessMatch {
 
 	public boolean isCheck() {
 		return check;
+	}
+	
+	public boolean isCheckmate() {
+		return checkmate;
 	}
 
 	public ChessPiece getEnPassantVulnerable() {
@@ -93,6 +98,30 @@ public class ChessMatch {
 		return false;
 	}
 	
+	private boolean testCheckmate(Color color) {
+		if (!this.testCheck(color)) {
+			return false;
+		}
+		for (ChessPiece piece : this.piecesOnTheBoard.stream().filter(x -> x.getColor() == color).collect(Collectors.toList())) {
+			boolean[][] moves = piece.possibleMoves();
+			for (int i = 0; i < moves.length; i++) {
+				for (int j = 0; j < moves[i].length; j++) {
+					if (moves[i][j]) {
+						ChessPosition sourcePosition = piece.getChessPosition();
+						ChessPosition targetPosition = new ChessPosition(8 - i, (char) ('a' + j));
+						ChessPiece capturedPiece = this.makeMove(sourcePosition, targetPosition);
+						boolean isCheck = this.testCheck(color);
+						this.undoMove(sourcePosition, targetPosition, capturedPiece);
+						if (!isCheck) {
+							return false;
+						}
+					}
+				}
+			}
+		}
+		return true;
+	}
+	
 	private ChessPiece king(Color color) {
 		for (ChessPiece piece : this.piecesOnTheBoard.stream().filter(x -> x.getColor() == color).collect(Collectors.toList())) {
 			if (piece instanceof King) {
@@ -115,12 +144,7 @@ public class ChessMatch {
 	public void performChessMove(ChessPosition sourcePosition, ChessPosition targetPosition) {
 		this.validateSourcePosition(sourcePosition);
 		this.validadeTargetPosition(sourcePosition, targetPosition);
-		ChessPiece capturedPiece = (ChessPiece) this.board.removePiece(targetPosition.toPosition());
-		this.board.placePiece(this.board.removePiece(sourcePosition.toPosition()), targetPosition.toPosition());;
-		if (capturedPiece != null) {
-			this.piecesOnTheBoard.remove(capturedPiece);
-			this.capturedPieces.add(capturedPiece);
-		}
+		ChessPiece capturedPiece = this.makeMove(sourcePosition, targetPosition);
 		
 		if (this.testCheck(currentPlayer)) {
 			this.undoMove(sourcePosition, targetPosition, capturedPiece);
@@ -131,7 +155,22 @@ public class ChessMatch {
 			this.check = true;
 		}
 		
-		this.nextTurn();
+		if (this.testCheckmate((currentPlayer == Color.WHITE) ? Color.BLACK : Color.WHITE)) {
+			this.checkmate = true;
+		}
+		else {
+			this.nextTurn();
+		}
+	}
+	
+	private ChessPiece makeMove(ChessPosition sourcePosition, ChessPosition targetPosition) {
+		ChessPiece capturedPiece = (ChessPiece) this.board.removePiece(targetPosition.toPosition());
+		this.board.placePiece(this.board.removePiece(sourcePosition.toPosition()), targetPosition.toPosition());
+		if (capturedPiece != null) {
+			this.piecesOnTheBoard.remove(capturedPiece);
+			this.capturedPieces.add(capturedPiece);
+		}
+		return capturedPiece;
 	}
 	
 	private void undoMove(ChessPosition sourcePosition, ChessPosition targetPosition, ChessPiece capturedPiece) {

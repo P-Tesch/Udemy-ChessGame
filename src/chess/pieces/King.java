@@ -15,7 +15,7 @@ public class King extends ChessPiece {
 		if (!this.getBoard().positionExists(position)) {
 			return false;
 		}
-		return this.getBoard().positionExists(position) && (!this.getBoard().thereIsAPiece(position) || this.isThereOpponentPiece(position));
+		return (!this.getBoard().thereIsAPiece(position) || this.isThereOpponentPiece(position));
 	}
 	
 	@Override
