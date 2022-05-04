@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import board.Board;
+import board.Position;
 import chess.enums.Color;
 import chess.pieces.Bishop;
 import chess.pieces.King;
@@ -77,7 +78,7 @@ public class ChessMatch {
 		}
 		this.placePiece('a', 1, new Rook(this.board, Color.WHITE));
 		this.placePiece('h', 1, new Rook(this.board, Color.WHITE));
-		this.placePiece('e', 1, new King(this.board, Color.WHITE));
+		this.placePiece('e', 1, new King(this.board, Color.WHITE, this));
 		this.placePiece('c', 1, new Bishop(this.board, Color.WHITE));
 		this.placePiece('f', 1, new Bishop(this.board, Color.WHITE));
 		this.placePiece('d', 1, new Queen(this.board, Color.WHITE));
@@ -89,7 +90,7 @@ public class ChessMatch {
 		}
 		this.placePiece('a', 8, new Rook(this.board, Color.BLACK));
 		this.placePiece('h', 8, new Rook(this.board, Color.BLACK));
-		this.placePiece('e', 8, new King(this.board, Color.BLACK));
+		this.placePiece('e', 8, new King(this.board, Color.BLACK, this));
 		this.placePiece('c', 8, new Bishop(this.board, Color.BLACK));
 		this.placePiece('f', 8, new Bishop(this.board, Color.BLACK));
 		this.placePiece('d', 8, new Queen(this.board, Color.BLACK));
@@ -189,23 +190,54 @@ public class ChessMatch {
 	
 	private ChessPiece makeMove(ChessPosition sourcePosition, ChessPosition targetPosition) {
 		ChessPiece capturedPiece = (ChessPiece) this.board.removePiece(targetPosition.toPosition());
-		this.board.placePiece(this.board.removePiece(sourcePosition.toPosition()), targetPosition.toPosition());
-		((ChessPiece)this.board.piece(targetPosition.toPosition())).increaseMovecount();
+		ChessPiece movingPiece = (ChessPiece) this.board.removePiece(sourcePosition.toPosition());
+		this.board.placePiece(movingPiece, targetPosition.toPosition());
+		movingPiece.increaseMovecount();
 		if (capturedPiece != null) {
 			this.piecesOnTheBoard.remove(capturedPiece);
 			this.capturedPieces.add(capturedPiece);
 		}
+		
+		// Castling kingside
+		if (movingPiece instanceof King && targetPosition.toPosition().getColumn() == sourcePosition.toPosition().getColumn() + 2) {
+			ChessPiece rook = (ChessPiece) this.board.removePiece(new Position(sourcePosition.toPosition().getRow(), sourcePosition.toPosition().getColumn() + 3));
+			this.board.placePiece(rook, new Position(sourcePosition.toPosition().getRow(), sourcePosition.toPosition().getColumn() + 1));
+			rook.increaseMovecount();
+		}
+		
+		// Castling queenside
+		if (movingPiece instanceof King && targetPosition.toPosition().getColumn() == sourcePosition.toPosition().getColumn() - 2) {
+			ChessPiece rook = (ChessPiece) this.board.removePiece(new Position(sourcePosition.toPosition().getRow(), sourcePosition.toPosition().getColumn() - 4));
+			this.board.placePiece(rook, new Position(sourcePosition.toPosition().getRow(), sourcePosition.toPosition().getColumn() - 1));
+			rook.increaseMovecount();
+		}		
+		
 		return capturedPiece;
 	}
 	
 	private void undoMove(ChessPosition sourcePosition, ChessPosition targetPosition, ChessPiece capturedPiece) {
-		this.board.placePiece(this.board.removePiece(targetPosition.toPosition()), sourcePosition.toPosition());
-		((ChessPiece)this.board.piece(sourcePosition.toPosition())).decreaseMovecount();
+		ChessPiece movingPiece = (ChessPiece) this.board.removePiece(targetPosition.toPosition());
+		this.board.placePiece(movingPiece, sourcePosition.toPosition());
+		movingPiece.decreaseMovecount();
 		if (capturedPiece != null) {
 			this.board.placePiece(capturedPiece, targetPosition.toPosition());
 			this.capturedPieces.remove(capturedPiece);
 			this.piecesOnTheBoard.add(capturedPiece);
 		}
+		
+		// Castling kingside
+		if (movingPiece instanceof King && targetPosition.toPosition().getColumn() == sourcePosition.toPosition().getColumn() + 2) {
+			ChessPiece rook = (ChessPiece) this.board.removePiece(new Position(sourcePosition.toPosition().getRow(), sourcePosition.toPosition().getColumn() + 1));
+			this.board.placePiece(rook, new Position(sourcePosition.toPosition().getRow(), sourcePosition.toPosition().getColumn() + 3));
+			rook.decreaseMovecount();
+		}
+		
+		// Castling queenside
+		if (movingPiece instanceof King && targetPosition.toPosition().getColumn() == sourcePosition.toPosition().getColumn() - 2) {
+			ChessPiece rook = (ChessPiece) this.board.removePiece(new Position(sourcePosition.toPosition().getRow(), sourcePosition.toPosition().getColumn() - 1));
+			this.board.placePiece(rook, new Position(sourcePosition.toPosition().getRow(), sourcePosition.toPosition().getColumn() - 4));
+			rook.decreaseMovecount();
+		}		
 	}
 	
 	public boolean[][] possibleMoves(ChessPosition sourcePosition) {
