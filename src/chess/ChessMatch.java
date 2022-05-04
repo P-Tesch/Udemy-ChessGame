@@ -173,19 +173,7 @@ public class ChessMatch {
 			throw new ChessException("Illegal move, can't put your own king in check ");
 		}
 		
-		if (this.testCheck((currentPlayer == Color.WHITE) ? Color.BLACK : Color.WHITE)) {
-			this.check = true;
-		}
-		else {
-			this.check = false;
-		}
-		
-		if (this.testCheckmate((currentPlayer == Color.WHITE) ? Color.BLACK : Color.WHITE)) {
-			this.checkmate = true;
-		}
-		else {
-			this.nextTurn();
-		}
+		this.check = this.testCheck((currentPlayer == Color.WHITE) ? Color.BLACK : Color.WHITE);
 		
 		// En passant
 		if (this.getBoard().piece(targetPosition.toPosition()) instanceof Pawn && (targetPosition.toPosition().getRow() == sourcePosition.toPosition().getRow() + 2 || targetPosition.toPosition().getRow() == sourcePosition.toPosition().getRow() - 2)) {
@@ -194,6 +182,50 @@ public class ChessMatch {
 		else {
 			this.enPassantVulnerable = null;
 		}
+		
+		this.promoted = null;
+		if (this.getBoard().piece(targetPosition.toPosition()) instanceof Pawn && (targetPosition.toPosition().getRow() == 0 || targetPosition.toPosition().getRow() == this.board.getRows() - 1)) {
+			this.promoted = (ChessPiece) this.getBoard().piece(targetPosition.toPosition());
+		}
+
+		if (this.testCheckmate((currentPlayer == Color.WHITE) ? Color.BLACK : Color.WHITE)) {
+			this.checkmate = true;
+		}
+		else {
+			this.nextTurn();
+		}
+	}
+	
+	public void replacePromotedPiece(String type) {
+		if (this.promoted == null) {
+			throw new IllegalStateException("There is no piece to be promoted");
+		}
+		
+		Position position = this.promoted.getChessPosition().toPosition();
+		this.piecesOnTheBoard.remove(this.promoted);
+		this.board.removePiece(position);
+		
+		ChessPiece newPiece;
+		switch (type) {
+		case "Q":
+			newPiece = new Queen(this.board, this.promoted.getColor());
+			break;
+		case "N":
+			newPiece = new Knight(this.board, this.promoted.getColor());
+			break;
+		case "R":
+			newPiece = new Rook(this.board, this.promoted.getColor());
+			break;
+		case "B":
+			newPiece = new Bishop(this.board, this.promoted.getColor());
+			break;
+		default:
+			newPiece = this.promoted;
+		}
+		this.piecesOnTheBoard.add(newPiece);
+		this.board.placePiece(newPiece, position);
+		this.check = this.testCheck(currentPlayer);
+		this.checkmate = this.testCheckmate(currentPlayer);
 	}
 	
 	private ChessPiece makeMove(ChessPosition sourcePosition, ChessPosition targetPosition) {
