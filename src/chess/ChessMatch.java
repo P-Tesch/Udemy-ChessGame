@@ -74,7 +74,7 @@ public class ChessMatch {
 	
 	private void initialSetup() {
 		for (int i = 0; i < this.getBoard().getColumns(); i++) {
-			this.placePiece((char)('a' + i), 2, new Pawn(this.board, Color.WHITE));
+			this.placePiece((char)('a' + i), 2, new Pawn(this.board, Color.WHITE, this));
 		}
 		this.placePiece('a', 1, new Rook(this.board, Color.WHITE));
 		this.placePiece('h', 1, new Rook(this.board, Color.WHITE));
@@ -86,7 +86,7 @@ public class ChessMatch {
 		this.placePiece('g', 1, new Knight(this.board, Color.WHITE));
 		
 		for (int i = 0; i < this.getBoard().getColumns(); i++) {
-			this.placePiece((char)('a' + i), 7, new Pawn(this.board, Color.BLACK));
+			this.placePiece((char)('a' + i), 7, new Pawn(this.board, Color.BLACK, this));
 		}
 		this.placePiece('a', 8, new Rook(this.board, Color.BLACK));
 		this.placePiece('h', 8, new Rook(this.board, Color.BLACK));
@@ -186,6 +186,14 @@ public class ChessMatch {
 		else {
 			this.nextTurn();
 		}
+		
+		// En passant
+		if (this.getBoard().piece(targetPosition.toPosition()) instanceof Pawn && (targetPosition.toPosition().getRow() == sourcePosition.toPosition().getRow() + 2 || targetPosition.toPosition().getRow() == sourcePosition.toPosition().getRow() - 2)) {
+			this.enPassantVulnerable = (ChessPiece) this.getBoard().piece(targetPosition.toPosition());
+		}
+		else {
+			this.enPassantVulnerable = null;
+		}
 	}
 	
 	private ChessPiece makeMove(ChessPosition sourcePosition, ChessPosition targetPosition) {
@@ -210,7 +218,16 @@ public class ChessMatch {
 			ChessPiece rook = (ChessPiece) this.board.removePiece(new Position(sourcePosition.toPosition().getRow(), sourcePosition.toPosition().getColumn() - 4));
 			this.board.placePiece(rook, new Position(sourcePosition.toPosition().getRow(), sourcePosition.toPosition().getColumn() - 1));
 			rook.increaseMovecount();
-		}		
+		}
+		
+		// En passant
+		if (this.enPassantVulnerable != null) {
+			if (movingPiece instanceof Pawn && targetPosition.toPosition().getColumn() == this.enPassantVulnerable.getChessPosition().toPosition().getColumn() && (targetPosition.toPosition().getRow() == this.enPassantVulnerable.getChessPosition().toPosition().getRow() - 1) || targetPosition.toPosition().getRow() == this.enPassantVulnerable.getChessPosition().toPosition().getRow() + 1) {
+				this.board.removePiece(this.enPassantVulnerable.getChessPosition().toPosition());
+				this.piecesOnTheBoard.remove(this.enPassantVulnerable);
+				this.capturedPieces.add(this.enPassantVulnerable);
+			}
+		}
 		
 		return capturedPiece;
 	}
@@ -237,7 +254,15 @@ public class ChessMatch {
 			ChessPiece rook = (ChessPiece) this.board.removePiece(new Position(sourcePosition.toPosition().getRow(), sourcePosition.toPosition().getColumn() - 1));
 			this.board.placePiece(rook, new Position(sourcePosition.toPosition().getRow(), sourcePosition.toPosition().getColumn() - 4));
 			rook.decreaseMovecount();
-		}		
+		}
+		
+		if (this.enPassantVulnerable != null) {
+			if (movingPiece instanceof Pawn && targetPosition.toPosition().getColumn() == this.enPassantVulnerable.getChessPosition().toPosition().getColumn() && (targetPosition.toPosition().getRow() == this.enPassantVulnerable.getChessPosition().toPosition().getRow() - 1) || targetPosition.toPosition().getRow() == this.enPassantVulnerable.getChessPosition().toPosition().getRow() + 1) {
+				this.board.placePiece(this.enPassantVulnerable, this.enPassantVulnerable.getChessPosition().toPosition());
+				this.piecesOnTheBoard.add(this.enPassantVulnerable);
+				this.capturedPieces.remove(this.enPassantVulnerable);
+			}
+		}
 	}
 	
 	public boolean[][] possibleMoves(ChessPosition sourcePosition) {
